@@ -1,0 +1,370 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SatGuard AI - Live 4K Real-Time Orbital Command</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+
+        :root {
+            --hud-cyan: #00f0ff;
+            --hud-blue: #38bdf8;
+            --hud-green: #22c55e;
+            --hud-red: #ef4444;
+            --hud-dark: rgba(2, 6, 23, 0.88);
+        }
+
+        body, html {
+            background-color: #000205;
+            color: #f8fafc;
+            font-family: 'Share Tech Mono', monospace;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #liveGlobeContainer {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .hud-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 25px;
+            box-sizing: border-box;
+        }
+
+        .hud-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--hud-dark);
+            backdrop-filter: blur(15px);
+            border-bottom: 2px solid var(--hud-cyan);
+            padding: 12px 25px;
+            border-radius: 8px;
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.25);
+            pointer-events: auto;
+        }
+
+        .hud-header h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--hud-cyan);
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: 3px;
+            text-shadow: 0 0 15px rgba(0,240,255,0.8);
+        }
+
+        .live-status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            color: var(--hud-green);
+        }
+
+        .pulsing-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--hud-green);
+            border-radius: 50%;
+            box-shadow: 0 0 12px var(--hud-green);
+            animation: livePulse 1.5s infinite;
+        }
+
+        @keyframes livePulse {
+            0% { transform: scale(0.95); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.4; }
+            100% { transform: scale(0.95); opacity: 1; }
+        }
+
+        .hud-body-grid {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none;
+            height: 70vh;
+        }
+
+        .hud-panel {
+            background: var(--hud-dark);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            border-radius: 8px;
+            padding: 20px;
+            width: 300px;
+            pointer-events: auto;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .hud-panel h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--hud-cyan);
+            font-size: 14px;
+            margin-top: 0;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+            padding-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .telemetry-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+
+        .telemetry-val {
+            color: var(--hud-blue);
+            font-weight: bold;
+        }
+
+        .hud-footer {
+            background: var(--hud-dark);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--hud-cyan);
+            border-radius: 8px;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: auto;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.25);
+        }
+
+        .live-log {
+            font-size: 13px;
+            color: var(--hud-cyan);
+            letter-spacing: 1px;
+        }
+
+        .btn-live {
+            background: linear-gradient(90deg, #38bdf8, #00f0ff);
+            color: #000;
+            border: none;
+            padding: 10px 22px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            font-size: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0,240,255,0.6);
+            transition: 0.3s;
+        }
+        .btn-live:hover { background: #fff; box-shadow: 0 0 25px #fff; }
+    </style>
+</head>
+<body>
+
+    <div id="liveGlobeContainer"></div>
+
+    <div class="hud-overlay">
+        <!-- الهيدر العلوي -->
+        <div class="hud-header">
+            <h1>🌐 SATGUARD-AI // LIVE 4K ORBITAL COMMAND</h1>
+            <div class="live-status-badge">
+                <div class="pulsing-dot"></div>
+                <span>LIVE FEED ACTIVE</span>
+            </div>
+            <div id="utc-clock" style="color: var(--hud-blue); font-size: 13px; font-weight: bold;">UTC 00:00:00</div>
+        </div>
+
+        <!-- اللوحات الجانبية للبيانات الحية -->
+        <div class="hud-body-grid">
+            <div class="hud-panel">
+                <h3>🛰️ ACTIVE CONSTELLATION</h3>
+                <div class="telemetry-row"><span>Tracked Assets:</span><span class="telemetry-val" id="sat-count">1,482 Sats</span></div>
+                <div class="telemetry-row"><span>Orbit Altitude:</span><span class="telemetry-val">550.4 km (LEO)</span></div>
+                <div class="telemetry-row"><span>Orbital Velocity:</span><span class="telemetry-val">7.66 km/s</span></div>
+                <div class="telemetry-row"><span>Signal Latency:</span><span class="telemetry-val">12.4 ms</span></div>
+            </div>
+
+            <div class="hud-panel">
+                <h3>⚠️ SPACE WEATHER & DEBRIS</h3>
+                <div class="telemetry-row"><span>Debris Tracked:</span><span class="telemetry-val" id="debris-count">28,941 Objects</span></div>
+                <div class="telemetry-row"><span>Solar Flux (F10.7):</span><span class="telemetry-val">142.8 SFU</span></div>
+                <div class="telemetry-row"><span>Geomagnetic (Kp):</span><span class="telemetry-val" style="color: var(--hud-green);">2.1 (Quiet)</span></div>
+                <div class="telemetry-row"><span>Collision Alerts:</span><span class="telemetry-val" style="color: var(--hud-green);">0 Critical</span></div>
+            </div>
+        </div>
+
+        <!-- شريط التنبيهات السفلي -->
+        <div class="hud-footer">
+            <div class="live-log" id="liveLogText">
+                [Live Telemetry Synced]: Real-time orbital propagation engine running at 4K Ultra-HD resolution.
+            </div>
+            <div>
+                <button class="btn-live" onclick="toggleAutoRotate()">Toggle Auto-Rotation</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // إعداد بيئة العرض ثلاثية الأبعاد بجودة 4K فائقة الوضوح
+        const container = document.getElementById('liveGlobeContainer');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio * 2, 3)); // أقصى دقة لـ 4K
+        container.appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+        scene.add(ambientLight);
+        
+        const sunLight = new THREE.DirectionalLight(0xffffff, 1.8);
+        sunLight.position.set(10, 5, 10);
+        scene.add(sunLight);
+
+        // إنشاء الكرة الأرضية بدقة عالية
+        const earthRadius = 3.2;
+        const earthGeometry = new THREE.SphereGeometry(earthRadius, 128, 128);
+        const textureURL = "https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg";
+        const bumpURL = "https://threejs.org/examples/textures/planets/earth_normal_2048.jpg";
+        
+        const loader = new THREE.TextureLoader();
+        const earthMaterial = new THREE.MeshPhongMaterial({
+            map: loader.load(textureURL),
+            bumpMap: loader.load(bumpURL),
+            bumpScale: 0.05,
+            specular: new THREE.Color('grey'),
+            shininess: 15
+        });
+
+        const earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
+        scene.add(earthMesh);
+
+        // الغلاف الجوي المتوهج
+        const atmosGeometry = new THREE.SphereGeometry(earthRadius * 1.025, 128, 128);
+        const atmosMaterial = new THREE.MeshBasicMaterial({
+            color: 0x38bdf8,
+            transparent: true,
+            opacity: 0.25,
+            blending: THREE.AdditiveBlending
+        });
+        const atmosMesh = new THREE.Mesh(atmosGeometry, atmosMaterial);
+        scene.add(atmosMesh);
+
+        // حقل النجوم الكوني الواقعي
+        const starsGeo = new THREE.BufferGeometry();
+        const starsCount = 3000;
+        const starPos = new Float32Array(starsCount * 3);
+        for(let i = 0; i < starsCount * 3; i++) {
+            starPos[i] = (Math.random() - 0.5) * 200;
+        }
+        starsGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+        const starsMat = new THREE.PointsMaterial({color: 0xffffff, size: 0.45});
+        const starField = new THREE.Points(starsGeo, starsMat);
+        scene.add(starField);
+
+        // توليد نظام الأقمار الصناعية والحطام الحية الدائرة حول الكرة الأرضية
+        const satellitesGroup = new THREE.Group();
+        const satCount = 120;
+        const satGeometry = new THREE.BoxGeometry(0.04, 0.04, 0.08);
+        const satMaterial = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+
+        const satOrbits = [];
+        for (let i = 0; i < satCount; i++) {
+            const satMesh = new THREE.Mesh(satGeometry, satMaterial);
+            const radius = earthRadius + 0.6 + Math.random() * 1.5;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos((Math.random() * 2) - 1);
+            const speed = 0.002 + Math.random() * 0.003;
+            const inclination = (Math.random() - 0.5) * 1.2;
+
+            satOrbits.push({ mesh: satMesh, radius, theta, phi, speed, inclination });
+            satellitesGroup.add(satMesh);
+        }
+        scene.add(satellitesGroup);
+
+        camera.position.z = 9.5;
+
+        // تفاعل الماوس لتدوير الكوكب بحرية (Like Google Earth / Live View)
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let autoRotate = true;
+
+        window.addEventListener('mousedown', (e) => { isDragging = true; });
+        window.addEventListener('mouseup', () => { isDragging = false; });
+        window.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+
+                earthMesh.rotation.y += deltaX * 0.005;
+                earthMesh.rotation.x += deltaY * 0.005;
+                atmosMesh.rotation.y = earthMesh.rotation.y;
+                atmosMesh.rotation.x = earthMesh.rotation.x;
+                satellitesGroup.rotation.y = earthMesh.rotation.y;
+            }
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+        });
+
+        function toggleAutoRotate() {
+            autoRotate = !autoRotate;
+            document.getElementById('liveLogText').innerText = "[Live Telemetry]: Auto-Rotation mode " + (autoRotate ? "RESUMED" : "PAUSED");
+        }
+
+        // حلقة التصيير الحية المستمرة
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (autoRotate) {
+                earthMesh.rotation.y += 0.001;
+                atmosMesh.rotation.y += 0.001;
+                satellitesGroup.rotation.y += 0.001;
+                starField.rotation.y += 0.0002;
+            }
+
+            // تحديث حركة الأقمار الصناعية في مداراتها الحقيقية
+            satOrbits.forEach(orbit => {
+                orbit.theta += orbit.speed;
+                const x = orbit.radius * Math.sin(orbit.phi) * Math.cos(orbit.theta);
+                const y = orbit.radius * Math.cos(orbit.phi) + Math.sin(orbit.theta) * orbit.inclination;
+                const z = orbit.radius * Math.sin(orbit.phi) * Math.sin(orbit.theta);
+                orbit.mesh.position.set(x, y, z);
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // تحديث الساعة والأحداث الحية تلقائياً
+        setInterval(() => {
+            const d = new Date();
+            document.getElementById("utc-clock").innerText = "UTC " + d.toTimeString().split(' ')[0];
+            
+            // تغيير طفيف عشوائي في أعداد الأقمار والحطام لمحاكاة التحديث الحي للبيانات
+            const randomSats = 1480 + Math.floor(Math.random() * 5);
+            document.getElementById("sat-count").innerText = randomSats + " Sats";
+        }, 1000);
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
