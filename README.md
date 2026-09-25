@@ -1,15 +1,12 @@
 # SatGuard AI: Edge-AI Orbital Defense System
 
-Welcome to the official repository for **SatGuard AI: Edge-AI Orbital Defense System**, submitted for SAIF 2026.
+أهلاً بكم في المستودع الرسمي لمشروع **SatGuard AI: Edge-AI Orbital Defense System**، المقدم لمسابقة SAIF 2026.
 
-## Project Assets & Links
-- **Platform & Dashboard Preview:** Check out the uploaded HTML files (`SatGuard_Live_4K_Command.html` and `SatGuard_Operations_Center.html`) directly in this repository.
-- **System Overview & Visuals:** Powered by real-time edge-AI simulations and optimized visual outputs (`SatGuard_AI_Dashboard.png`).
-# SatGuard AI: Edge-AI Orbital Defense System
+## 🚀 روابط المنصة ولوحات التحكم الحية (Live Platforms)
+يمكنكم تجربة ومراسلة واجهات النظام مباشرة عبر الروابط التالية:
+- **لوحة التحكم الرئيسية (الواجهة الأولى):** [افتح منصة العرض الحية](https://israamo88.github.io/SatGuard-AI-Submission/SatGuard_Live_4K_Command.html)
+- **مركز العمليات والتحكم الإضافي (الواجهة الثانية):** [افتح مركز العمليات](https://israamo88.github.io/SatGuard-AI-Submission/Dashboard_2.html)
 
-Welcome to the official repository for **SatGuard AI: Edge-AI Orbital Defense System**, submitted for SAIF 2026.
-
-## Project Assets & Links
-- **Platform & Dashboard Preview (Live Site):** [Open SatGuard Live Command](https://israamo88.github.io/SatGuard-AI-Submission/SatGuard_Live_4K_Command.html)
-- **Operations Center:** [Open Operations Center](https://israamo88.github.io/SatGuard-AI-Submission/SatGuard_Operations_Center.html)
-- **System Overview & Visuals:** Powered by real-time edge-AI simulations and optimized visual outputs (`SatGuard_AI_Dashboard.png`).
+## 📌 نظرة عامة على المشروع
+- **فكرة النظام:** نظام دفاع مداري مدعوم بالذكاء الاصطناعي الحافز (Edge-AI) لمراقبة وحماية الأقمار الصناعية.
+- **الملفات والمخرجات البصرية:** يتضمن المستودع كافة الأكواد ومحاكاة الـ 4K ولوحات القيادة المرئية (`SatGuard_AI_Dashboard.png`) المصممة خصيصاً لتقديم تجربة مستخدم فائقة الدقة.
